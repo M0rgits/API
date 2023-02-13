@@ -1,0 +1,1 @@
+[{"name":"Playstation","core":"mednafen_psx_hw","img":"psx.png"},{"name":"Nintendo Ds","core":"melonds","img":"nintendods.png"},{"name":"Nintendo 64","core":"mupen64plus_next","img":"nintendo64.png"},{"name":"NES","core":"nestopia","img":"nes.png"},{"name":"GameBoy(gb, gba, gbc)","core":"mgba","img":"gbc.png"}]

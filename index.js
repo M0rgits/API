@@ -123,35 +123,37 @@ router.post('/upload', urlencodedparser, function(req, res){
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;
-    fs.rename(oldpath, newpath, function (err) {
+    fs.copyFile(oldpath, newpath, function (err) {
       if (err) throw err;
     });
     if(fields.type === 'h5g'){
       let jsonpath = './json/h5g.json';
       let json = JSON.parse(fs.readFileSync(jsonpath));
       let name = fields.name
-      if(fields.hasOwnProperty('path')){
+      if(fields.path != ''){
         let path = fields.path
         json.push({name: name, path: path, img: imgname, pop:0});
         let data = JSON.stringify(json);
         fs.writeFileSync(jsonpath, data);
-        console.log(name + " added to h5g.json")
+        res.send(name + " added to h5g.json")
+        res.end()
       }
-      if(fields.hasOwnProperty('iframe')){
-        let iframe = fields.path
+      if(fields.iframe != ''){
+        let iframe = fields.iframe
         json.push({name: name, iframe: iframe, img: imgname, pop:0});
         let data = JSON.stringify(json);
         fs.writeFileSync(jsonpath, data);
-        console.log(name + " added to h5g.json")
+        res.send(name + " added to h5g.json")
       }
-      if(fields.hasOwnProperty('custom')){
-        if(fields.hasOwnProperty('prox')){
+      if(fields.custom != ''){
+        if(fields.prox != ''){
           let custom = fields.custom;
           let prox = fields.prox;
           json.push({name: name, custom: custom, prox: prox ,img: imgname, pop:0});
           let data = JSON.stringify(json);
           fs.writeFileSync(jsonpath, data);
-          console.log(name + " added to h5g.json")
+          res.send(name + " added to h5g.json")
+          res.end()
         }
         else{
           let custom = fields.path
@@ -159,6 +161,7 @@ router.post('/upload', urlencodedparser, function(req, res){
           let data = JSON.stringify(json);
           fs.writeFileSync(jsonpath, data);
           console.log(name + " added to h5g.json")
+          res.end()
         }
       }
     }
@@ -172,6 +175,7 @@ router.post('/upload', urlencodedparser, function(req, res){
       let data = JSON.stringify(json);
       fs.writeFileSync(jsonpath, data);
       res.send(name + " added to emu.json")
+      res.end();
       }
     })
   });

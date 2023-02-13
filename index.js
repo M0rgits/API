@@ -1,17 +1,17 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import fs from 'fs';
-import formidable from 'formidable';
-import path from 'path';
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const formidable = require('formidable');
+const path = require('path');
 
-const __dirname = path.resolve();
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
 
-import h5g from './json/h5g.json' assert {type: 'json'};
-import emu from './json/emu.json' assert {type: 'json'};
-import sites from './json/sites.json' assert {type: 'json'};
+const h5g = require('./json/h5g.json');
+const emu = require('./json/emu.json'); 
+const sites = require('./json/sites.json'); 
+
 app.use(router);
 app.use(express.static(path.normalize(__dirname + '/html/')));
 
@@ -125,15 +125,68 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
   }
 });
 
-router.post('/img/h5g/upload', urlencodedparser ,function(req, res){
+
+router.post('/upload', urlencodedparser, function(req, res){
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
-    var oldpath = files.filetoupload.filepath;
-    var newpath = `./img/h5g/` + files.filetoupload.originalFilename;
+    var oldpath = files.upload.filepath;
+    var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
+    var imgname = files.upload.originalFilename;
     fs.copyFile(oldpath, newpath, function (err) {
       if (err) throw err;
     });
+    if(fields.type === 'h5g'){
+      let jsonpath = './json/h5g.json';
+      let json = JSON.parse(fs.readFileSync(jsonpath));
+      let name = fields.name
+      if(fields.hasOwnProperty('path')){
+        let path = fields.path
+        json.push({name: name, path: path, img: imgname, pop:0});
+        let data = JSON.stringify(json);
+        fs.writeFileSync(jsonpath, data);
+        console.log(name + " added to h5g.json")
+      }
+      if(fields.hasOwnProperty('iframe')){
+        let iframe = fields.path
+        json.push({name: name, iframe: iframe, img: imgname, pop:0});
+        let data = JSON.stringify(json);
+        fs.writeFileSync(jsonpath, data);
+        console.log(name + " added to h5g.json")
+      }
+      if(fields.hasOwnProperty('custom')){
+        if(fields.hasOwnProperty('prox')){
+          let custom = fields.custom;
+          let prox = fields.prox;
+          json.push({name: name, custom: custom, prox: prox ,img: imgname, pop:0});
+          let data = JSON.stringify(json);
+          fs.writeFileSync(jsonpath, data);
+          console.log(name + " added to h5g.json")
+        }
+        else{
+          let custom = fields.path
+          json.push({name: name, custom: custom, img: imgname, pop:0});
+          let data = JSON.stringify(json);
+          fs.writeFileSync(jsonpath, data);
+          console.log(name + " added to h5g.json")
+        }
+      }
+    }
+    if(fields.type === 'emu'){
+      let jsonpath = './json/emu.json';
+      let json = JSON.parse(fs.readFileSync(jsonpath));
+      let name = fields.name;
+      let core = fields.core;
+      let rom = fields.rom;
+      json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
+      let data = JSON.stringify(json);
+      fs.writeFileSync(jsonpath, data);
+      console.log(name + " added to emu.json")
+      }
+    })
   });
+
+router.get('/json/update', function(req, res){
+  res.sendFile('upload.html', {root:'./html/'})
 })
 
 router.post('/json/h5g/update/iframe', urlencodedparser, async function(req, res){
@@ -144,10 +197,5 @@ router.post('/json/h5g/update/iframe', urlencodedparser, async function(req, res
   console.log(list);
 })
 
-router.get('/crashbandicootwarped.bin', function(req, res){
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  res.sendFile('crashbandicootwarped.zip', {root:'./emu/'});
-})
 
-app.listen(80);
+app.listen(8080);

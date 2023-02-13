@@ -102,14 +102,6 @@ router.post('/gmesel', urlencodedparser, async function(req, res){
   console.log('Updated pop')
 });
 
-router.post('/upload/emu', urlencodedparser ,function(req, res){
-  let JSON = fs.readFileSync(`./json/emu.json`, 'utf-8');
-  let list = JSON.parse(JSON);
-    list.push({name: req.body.name, core: req.body.core, rom: req.body.rom, img: req.body.img, description: req.body.description, pop: 0});
-  let data = JSON.stringify(list);
-  fs.writeFileSync('./json/emu.json', data);
-})
-
 router.post('/gmerequest', urlencodedparser, function(req, res){
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -125,14 +117,13 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
   }
 });
 
-
 router.post('/upload', urlencodedparser, function(req, res){
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;
-    fs.copyFile(oldpath, newpath, function (err) {
+    fs.rename(oldpath, newpath, function (err) {
       if (err) throw err;
     });
     if(fields.type === 'h5g'){
@@ -180,22 +171,31 @@ router.post('/upload', urlencodedparser, function(req, res){
       json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
       let data = JSON.stringify(json);
       fs.writeFileSync(jsonpath, data);
-      console.log(name + " added to emu.json")
+      res.send(name + " added to emu.json")
       }
     })
   });
 
+router.post('/upload/rom', function(req, res){
+  var form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    var oldpath = files.upload.filepath;
+    var newpath = `./emu/` + files.upload.originalFilename;
+    var name = files.upload.originalFilename;
+    fs.rename(oldpath, newpath, function (err) {
+      if (err) throw err;
+    });
+    res.send('rom uploaded')
+  });
+})
+
 router.get('/json/update', function(req, res){
   res.sendFile('upload.html', {root:'./html/'})
 })
-
-router.post('/json/h5g/update/iframe', urlencodedparser, async function(req, res){
-  let json = {name:req.body.name, iframe:req.body.iframe, img:req.body.img, pop:0}
-  let JSONlist = await fs.readFileSync(`./json/${req.body.type}.json`, 'utf-8');
-  let list = JSON.parse(JSONlist);
-  list.push(json);
-  console.log(list);
+router.get('/uploadrom', function(req, res){
+  res.sendFile('uploadrom.html', {root:'./html/'})
 })
+
 
 
 app.listen(8080);

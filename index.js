@@ -123,7 +123,7 @@ router.post('/upload', urlencodedparser, function(req, res){
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;
-    fs.copyFile(oldpath, newpath, function (err) {
+    fs.rename(oldpath, newpath, function (err) {
       if (err) throw err;
     });
     if(fields.type === 'h5g'){
@@ -199,7 +199,15 @@ router.get('/json/update', function(req, res){
 router.get('/uploadrom', function(req, res){
   res.sendFile('uploadrom.html', {root:'./html/'})
 })
-
+router.get('/request/h5g', function(req, res){
+  res.sendFile('h5g.txt', {root: './forms'})
+})
+router.get('/request/emu', function(req, res){
+  res.sendFile('emu.txt', {root: './forms'})
+})
+router.get('/request/other', function(req, res){
+  res.sendFile('other.txt', {root: './forms'})
+})
 
 
 app.listen(8080);

@@ -35,10 +35,6 @@ for(let item of h5g){
   })
 };
 
-router.get('/emu', function(req, res){
-  res.sendFile('emu.html', {root: './html/'})
-})
-
 for(let item of emu){
   if(item.hasOwnProperty('rom')){
     router.get(`/${item.rom}`, function(req, res){
@@ -51,6 +47,14 @@ for(let item of emu){
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.download(`${item.img}`, {root: './img/emu/'});
+  })
+}
+
+for(let item of sites){
+  router.get('/img/sites/' + item.img.slice(0, -4), function(req, res){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.download(item.img, {root:'./img/sites/'});
   })
 }
 
@@ -71,21 +75,6 @@ router.post('/sitesjson', function(req, res){
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
   res.send(sites);
 })
-
-router.get('/json/h5gjson', function(req, res){
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  res.send(h5g);
-})
-
-
-for(let item of sites){
-  router.get('/img/sites/' + item.img.slice(0, -4), function(req, res){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    res.download(item.img, {root:'./img/sites/'});
-  })
-}
 
 router.post('/gmesel', urlencodedparser, async function(req, res){
   let JSONlist = await fs.readFileSync(`./json/${req.body.type}.json`, 'utf-8');
@@ -193,21 +182,17 @@ router.post('/upload/rom', function(req, res){
   });
 })
 
-router.get('/json/update', function(req, res){
-  res.sendFile('upload.html', {root:'./html/'})
+router.get('/dev', function(req, res){
+  res.sendFile('dev.html', {root: './html/'});
 })
-router.get('/uploadrom', function(req, res){
-  res.sendFile('uploadrom.html', {root:'./html/'})
+router.get('/h5greq', function(req, res){
+  res.sendFile('h5g.txt', {root:'./forms/'})
 })
-router.get('/request/h5g', function(req, res){
-  res.sendFile('h5g.txt', {root: './forms'})
+router.get('/emureq', function(req, res){
+  res.sendFile('emu.txt', {root:'./forms/'})
 })
-router.get('/request/emu', function(req, res){
-  res.sendFile('emu.txt', {root: './forms'})
+router.get('/otherreq', function(req, res){
+  res.sendFile('other.txt', {root:'./forms/'})
 })
-router.get('/request/other', function(req, res){
-  res.sendFile('other.txt', {root: './forms'})
-})
-
 
 app.listen(8080);

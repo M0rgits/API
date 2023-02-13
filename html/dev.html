@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  </head>
+  <body>
+    <a>EMU</a>
+    <form action="/upload" enctype="multipart/form-data" method="post">
+    <input type="text" name="type" placeholder="type"><br>
+    <input type="text" name="name" placeholder="name"><br>
+    <input type="text" name="core" placeholder="core"><br>
+    <input type="text" name="rom" placeholder="rom"><br>
+    <input type="file" name="upload" multiple="multiple"><br>
+    <input type="submit" value="Upload">
+    </form>
+    <a>H5G</a>
+    <form action="/upload" enctype="multipart/form-data" method="post">
+    <input type="text" name="type" placeholder="type"><br>
+    <input type="text" name="name" placeholder="name"><br>
+    <input type="text" name="path" placeholder="path?"><br>
+    <input type="text" name="iframe" placeholder="iframe?"><br>
+    <input type="text" name="custom" placeholder="custom?"><br>
+    <input type="text" name="prox" placeholder="prox?"><br>
+    <input type="file" name="upload" multiple="multiple"><br>
+    <input type="submit" value="Upload">
+    </form>
+    <a href='/h5greq'>H5G req</a>
+    <a href='/emureq'>EMU req</a>
+    <a href='/otherreq'>OTHER req</a>
+  </body>
+</html>

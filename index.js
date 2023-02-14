@@ -118,24 +118,20 @@ router.post('/upload', urlencodedparser, function(req, res){
       var newrompath = '../shared/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-        var post_options = {
-          path: 'http://localhost:8081/',
-          method: 'POST',
-          headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        };  
-        var post_content = {path: files.romupload.originalFilename};
-        var post_req = http.request(post_options, function(res) {
-          res.setEncoding('utf8');
-          res.on('data', function (chunk) {
-            console.log('Response: ' + chunk);
-          });
+          const options = {
+            hostname: 'http://localhost:8081',
+            path: '/',
+            method: 'POST'
+          };
+          var postData = JSON.stringify({path: files.romupload.originalFilename})
+        var request = http.request(options)
+        request.on('error', (e) => {
+          console.error(e);
         });
-        post_req.write(post_content);
-        post_req.end();
-      })
-    }
+        req.write(postData);
+        req.end();
+        })  
+      }
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;
@@ -195,6 +191,7 @@ router.post('/upload', urlencodedparser, function(req, res){
       }
     })
   });
+
 
 router.post('/upload/rom', urlencodedparser, function(req, res){
   var form = new formidable.IncomingForm({maxFileSize: 999 * 1024 * 1024, uploadDir: './emu/'})

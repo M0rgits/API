@@ -109,8 +109,9 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
 
 router.post('/upload', urlencodedparser, function(req, res){
   req.setTimeout(9999999999);
-  var form = new formidable.IncomingForm();
+  var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
   form.parse(req, function (err, fields, files) {
+    if(err) throw err;
     if(files.romupload){
       var oldrompath = files.romupload.filepath;
       var newrompath = './emu/' + files.romupload.originalFilename;
@@ -168,7 +169,7 @@ router.post('/upload', urlencodedparser, function(req, res){
       let json = JSON.parse(fs.readFileSync(jsonpath));
       let name = fields.name;
       let core = fields.core;
-      let rom = fields.rom;
+      let rom = files.romupload.originalFilename;
       json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
       let data = JSON.stringify(json);
       fs.writeFileSync(jsonpath, data);

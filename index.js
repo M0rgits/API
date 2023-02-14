@@ -4,9 +4,6 @@ const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
 const axios = require('axios');
-const admzip = require('adm-zip');
-const { exec } = require('child_process');
-
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
@@ -109,7 +106,7 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
   }
 });
 
-router.post('/upload', urlencodedparser, async function(req, res){
+router.post('/upload', urlencodedparser, function(req, res){
   req.setTimeout(9999999999);
   var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
   form.parse(req, function (err, fields, files) {
@@ -119,11 +116,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
       var newrompath = './tmp/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-          const zip = new admzip('./tmp/' + files.romupload.originalFilename)
-          zip.extractAllTo('./tmp/');
-          exec('chdman createcd ./tmp/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.cue').then( function(){
-            fs.rename('./tmp/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd', './emu/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd')
-          })
+          axios.post('http://localhost:8081/', {path: JSON.stringify(files.romupload.originalFilename)});
         })  
       }
     var oldpath = files.upload.filepath;
@@ -176,7 +169,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
       let json = JSON.parse(fs.readFileSync(jsonpath));
       let name = fields.name;
       let core = fields.core;
-      let rom = JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd';
+      let rom = files.romupload.originalFilename;
       json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
       let data = JSON.stringify(json);
       fs.writeFileSync(jsonpath, data);

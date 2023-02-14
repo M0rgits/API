@@ -17,7 +17,7 @@ app.use(router);
 app.use(express.static(path.normalize(__dirname + '/html/')));
 
 router.get('/', function(req, res){
-  res.sendFile('why are you here?')
+  res.send('why are you here?')
   res.end();
 })
 
@@ -170,18 +170,18 @@ router.post('/upload', urlencodedparser, function(req, res){
     })
   });
 
-router.post('/upload/rom', bodyParser.raw({ limit : '2gb', type : '*/*'}), function(req, res){
-  res.setTimeout(600000)
-  var form = new formidable.IncomingForm();
+router.post('/upload/rom', urlencodedparser, function(req, res){
+  var form = new formidable.IncomingForm({maxFileSize: 999 * 1024 * 1024, uploadDir: './emu/'})
   form.parse(req, function (err, fields, files) {
+    if (err){
+      console.log(err);
+    }
     var oldpath = files.upload.filepath;
     var newpath = `./emu/` + files.upload.originalFilename;
-    var name = files.upload.originalFilename;
-    fs.rename(oldpath, newpath, function (err) {
-      if (err) throw err;
+    fs.rename(oldpath, newpath, function (erro) {
+      if (erro) throw erro;
     });
-    res.send('rom uploaded')
-  });
+  })
 })
 
 router.get('/dev', function(req, res){

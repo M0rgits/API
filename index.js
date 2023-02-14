@@ -177,7 +177,7 @@ router.post('/upload/rom', urlencodedparser, function(req, res){
       console.log(err);
     }
     var oldpath = files.upload.filepath;
-    var newpath = `./emu/` + files.upload.originalFilename;
+    var newpath = `./emu/` + fields.filename;
     fs.rename(oldpath, newpath, function (erro) {
       if (erro) throw erro;
     });

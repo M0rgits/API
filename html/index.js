@@ -61,29 +61,6 @@ function checkh5gtype(){
   };
 }
 
-function postFile() {
-  var formdata = new FormData();
-
-  formdata.append('file1', document.getElementById('file1').files[0]);
-
-  var request = new XMLHttpRequest();
-
-  request.upload.addEventListener('progress', function (e) {
-      var file1Size = document.getElementById('file1').files[0].size;
-      document.getElementById('filesize').innerHTML = file1Size;
-      if (e.loaded <= file1Size) {
-          var percent = Math.round(e.loaded / file1Size * 100);
-          document.getElementById('progress-bar-file1').style.width = percent + '%';
-          document.getElementById('progress-bar-file1').innerHTML = percent + '%';
-      } 
-
-      if(e.loaded == e.total){
-          document.getElementById('progress-bar-file1').style.width = '100%';
-          document.getElementById('progress-bar-file1').innerHTML = '100%';
-      }
-  });   
-
-  request.open('post', '/upload/rom');
-  request.timeout = 45000000;
-  request.send(formdata);
-}
+document.getElementById('romupload').addEventListener('change', function(){
+  document.getElementById('romfilename').value = document.getElementById('romupload').value
+})

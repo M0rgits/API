@@ -180,8 +180,10 @@ router.post('/upload/rom', urlencodedparser, function(req, res){
     var newpath = `/root/api/emu/` + fields.filename.slice(12);
     fs.rename(oldpath, newpath, function (erro) {
       if (erro) throw erro;
-    });
+    })
   })
+  console.log('rom added');
+  res.send('rom added');
 })
 
 router.get('/dev', function(req, res){

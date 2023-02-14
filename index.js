@@ -16,7 +16,7 @@ app.use(router);
 app.use(express.static(path.normalize(__dirname + '/html/')));
 
 router.get('/', function(req, res){
-  res.send('why are you here?')
+  res.sendFile('why are you here?')
   res.end();
 })
 

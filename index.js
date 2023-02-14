@@ -4,6 +4,7 @@ const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
 
+
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
@@ -169,7 +170,7 @@ router.post('/upload', urlencodedparser, function(req, res){
     })
   });
 
-router.post('/upload/rom', function(req, res){
+router.post('/upload/rom', bodyParser.raw({ limit : '2gb', type : '*/*'}), function(req, res){
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
     var oldpath = files.upload.filepath;

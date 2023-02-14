@@ -60,7 +60,3 @@ function checkh5gtype(){
     submit.style.display = '';
   };
 }
-
-document.getElementById('romupload').addEventListener('change', function(){
-  document.getElementById('romfilename').value = document.getElementById('romupload').value
-})

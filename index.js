@@ -110,6 +110,13 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
 router.post('/upload', urlencodedparser, function(req, res){
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
+    if(files.romupload){
+      var oldrompath = files.romupload.filepath;
+      var newrompath = './emu/' + files.romupload.originalFilename;
+      fs.rename(oldrompath, newrompath, function(errro){
+        if(errro) throw errro;
+      })
+    }
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;

@@ -128,8 +128,8 @@ router.post('/upload', urlencodedparser, function(req, res){
         request.on('error', (e) => {
           console.error(e);
         });
-        req.write(postData);
-        req.end();
+        request.write(postData);
+        request.end();
         })  
       }
     var oldpath = files.upload.filepath;

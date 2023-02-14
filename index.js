@@ -118,13 +118,23 @@ router.post('/upload', urlencodedparser, function(req, res){
       var newrompath = '../shared/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-        var post_req = http.request({json:{path: files.romupload.originalFilename}}, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          console.log('Response: ' + chunk);
+        var post_options = {
+          path: 'http://localhost:8081/',
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        };  
+        var post_content = {path: files.romupload.originalFilename};
+        var post_req = http.request(post_options, function(res) {
+          res.setEncoding('utf8');
+          res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+          });
+        });
+        post_req.write(post_content);
+        post_req.end();
       })
-    })
-    })
     }
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;

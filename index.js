@@ -108,6 +108,7 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
 });
 
 router.post('/upload', urlencodedparser, function(req, res){
+  req.setTimeout(9999999999);
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
     if(files.romupload){

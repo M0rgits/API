@@ -3,8 +3,9 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
-const http = require('http');
-
+const axios = require('axios');
+const admzip = require('adm-zip');
+const { exec } = require('child_process');
 
 const app = express();
 const router = express.Router();
@@ -108,29 +109,21 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
   }
 });
 
-router.post('/upload', urlencodedparser, function(req, res){
+router.post('/upload', urlencodedparser, async function(req, res){
   req.setTimeout(9999999999);
-  var form = new formidable.IncomingForm({uploadDir: '../shared/', maxFileSize: 2048 * 1024 * 1024});
+  var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
       var oldrompath = files.romupload.filepath;
-      var newrompath = '../shared/' + files.romupload.originalFilename;
+      var newrompath = './tmp/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-          const options = {
-            hostname: 'http://localhost/',
-            port: 8081,
-            path: '/',
-            method: 'POST'
-          };
-          var postData = JSON.stringify({path: files.romupload.originalFilename})
-        var request = http.request(options)
-        request.on('error', (e) => {
-          console.error(e);
-        });
-        request.write(postData);
-        request.end();
+          const zip = new admzip('./tmp/' + files.romupload.originalFilename)
+          zip.extractAllTo('./tmp/');
+          exec('chdman createcd ./tmp/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.cue').then( function(){
+            fs.rename('./tmp/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd', './emu/' + JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd')
+          })
         })  
       }
     var oldpath = files.upload.filepath;
@@ -183,7 +176,7 @@ router.post('/upload', urlencodedparser, function(req, res){
       let json = JSON.parse(fs.readFileSync(jsonpath));
       let name = fields.name;
       let core = fields.core;
-      let rom = files.romupload.originalFilename;
+      let rom = JSON.stringify(files.romupload.originalFilename).slice(0, -3) + '.chd';
       json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
       let data = JSON.stringify(json);
       fs.writeFileSync(jsonpath, data);

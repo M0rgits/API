@@ -171,6 +171,7 @@ router.post('/upload', urlencodedparser, function(req, res){
   });
 
 router.post('/upload/rom', bodyParser.raw({ limit : '2gb', type : '*/*'}), function(req, res){
+  res.setTimeout(600000)
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
     var oldpath = files.upload.filepath;

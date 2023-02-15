@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
-const axios = require('axios');
+const http = require('http');
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
@@ -116,7 +116,18 @@ router.post('/upload', urlencodedparser, function(req, res){
       var newrompath = '../shared/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-          axios.post('http://localhost:8081/', {path: JSON.stringify(files.romupload.originalFilename)});
+          var urlparams = {
+            host: 'localhost:8080/', //No need to include 'http://' or 'www.'
+            port: 8081,
+            path: '/',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json', //Specifying to the server that we are sending JSON 
+            }
+          };
+          var request = http.request(urlparams);
+          request.write(JSON.stringify(files.romupload.originalFilename));
+          request.end();
         })  
       }
     var oldpath = files.upload.filepath;

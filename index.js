@@ -131,7 +131,7 @@ router.post('/upload', urlencodedparser, function(req, res){
         
         myStream.on('end', function () {
           console.log('unzipped file');
-          fs.rename(`./tmp/${basename}/${JSON.stringify(files.romupload.originalFilename).slice(0, -3)}.cue`, `./tmp/${basename}/${basename}.cue`);
+          fs.renameSync(`./tmp/${basename}/${JSON.stringify(files.romupload.originalFilename).slice(0, -3)}.cue`, `./tmp/${basename}/${basename}.cue`);
           const chdman = spawn(`chdman createcd -i ./tmp/${basename}/${basename}.cue -o ./emu/${basename}.chd`);
           chdman.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);

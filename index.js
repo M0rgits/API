@@ -117,7 +117,7 @@ router.post('/upload', urlencodedparser, function(req, res){
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
           var urlparams = {
-            host: 'localhost:8080/', //No need to include 'http://' or 'www.'
+            host: 'localhost', //No need to include 'http://' or 'www.'
             port: 8081,
             path: '/',
             method: 'POST',

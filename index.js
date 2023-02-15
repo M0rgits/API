@@ -124,7 +124,6 @@ router.post('/upload', urlencodedparser, function(req, res){
         })
         myStream.on('progress', (progress) => {
           console.log(progress.percent);
-          res.send([progress.percent])
         })
         
         myStream.on('end', function () {

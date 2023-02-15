@@ -116,7 +116,7 @@ router.post('/upload', urlencodedparser, function(req, res){
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
-      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename).slice(0, -3));
+      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename.slice(0, -3)));
       
       var oldrompath = files.romupload.filepath;
       var newrompath = './tmp/' + basename + '.7z';
@@ -244,5 +244,7 @@ router.get('/emureq', function(req, res){
 router.get('/otherreq', function(req, res){
   res.sendFile('other.txt', {root:'./forms/'})
 })
+let test = 'Crash Bandicoot (USA)\Crash Bandicoot (USA).7z'
+console.log(string.sanitize(test.slice(0, -3)));
 
 app.listen(8080);

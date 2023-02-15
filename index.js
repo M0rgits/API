@@ -3,7 +3,9 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
-const http = require('http');
+const seven = require('node-7z');
+const { exec } = require('child_process');
+
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
@@ -108,26 +110,30 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
 
 router.post('/upload', urlencodedparser, function(req, res){
   req.setTimeout(9999999999);
-  var form = new formidable.IncomingForm({uploadDir: '../shared/', maxFileSize: 2048 * 1024 * 1024});
+  var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
       var oldrompath = files.romupload.filepath;
-      var newrompath = '../shared/' + files.romupload.originalFilename;
+      var newrompath = './tmp/' + files.romupload.originalFilename;
+      var path = files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-          var urlparams = {
-            host: 'localhost', //No need to include 'http://' or 'www.'
-            port: 8081,
-            path: '/',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json', //Specifying to the server that we are sending JSON 
-            },
-            body: {page: JSON.stringify(files.romupload.originalFilename)}
-            
-          };
-          var request = http.request(urlparams);
+        const myStream = seven.extractFull('./tmp/' + path, './tmp/', {
+          $progress: true
+        })
+        myStream.on('progress', (progress) => {
+          console.log(progress.percent);
+          req.send([progress.percent])
+        })
+        
+        myStream.on('end', function () {
+          console.log('unzipped file');
+          exec('chdman createcd "' + JSON.stringify(path).slice(0, -3) + '.cue" ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd')
+        })
+        myStream.on('error', (err) => {
+          throw err;
+        })
         })  
       }
     var oldpath = files.upload.filepath;

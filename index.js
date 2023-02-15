@@ -130,7 +130,7 @@ router.post('/upload', urlencodedparser, function(req, res){
         })
         myStream.on(`data`, (data) => {
           var clean = string.sanitize(data.file.slice(5, -4))+ data.file.slice(-4)
-          fs.rename(data.file, './tmp/' + clean, function(err){
+          fs.rename('./tmp/' + data.file, './tmp/' + clean, function(err){
             if(err) throw err;
           })
         })

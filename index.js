@@ -5,6 +5,7 @@ const formidable = require('formidable');
 const path = require('path');
 const seven = require('node-7z');
 const { spawn } = require('child_process');
+const string = require('string-sanitizer');
 
 const app = express();
 const router = express.Router();
@@ -115,12 +116,16 @@ router.post('/upload', urlencodedparser, function(req, res){
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
+      const basename = JSON.stringify(files.romupload.originalFilename).slice(0, -3).then(e => {
+        s = string.sanitize(e)
+        return s;
+      })
+      
       var oldrompath = files.romupload.filepath;
-      var newrompath = './tmp/' + files.romupload.originalFilename;
-      var path = files.romupload.originalFilename;
+      var newrompath = './tmp/' + basename + '.7z';
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
-        const myStream = seven.extractFull('./tmp/' + path, './tmp/', {
+        const myStream = seven.extractFull('./tmp/' + basename + '.7z', './tmp/', {
           $progress: true
         })
         myStream.on('progress', (progress) => {
@@ -129,8 +134,8 @@ router.post('/upload', urlencodedparser, function(req, res){
         
         myStream.on('end', function () {
           console.log('unzipped file');
-          console.log('chdman createcd -i ./tmp/' + JSON.stringify(path).slice(0, -3) + '/' + JSON.stringify(path).slice(0, -3) + '.cue -o ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd')
-          const chdman = spawn('chdman', ['chdman createcd -i ./tmp/' + JSON.stringify(path).slice(0, -3) + '/' + JSON.stringify(path).slice(0, -3) + '.cue -o ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd']);
+          fs.rename(`./tmp/${basename}/${JSON.stringify(files.romupload.originalFilename).slice(0, -3)}.cue`, `./tmp/${basename}/${basename}.cue`);
+          const chdman = spawn(`chdman createcd -i ./tmp/${basename}/${basename}.cue -o ./emu/${basename}.chd`);
           chdman.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
           });

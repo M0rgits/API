@@ -123,11 +123,11 @@ router.post('/upload', urlencodedparser, function(req, res){
             method: 'POST',
             headers: {
               'Content-Type': 'application/json', //Specifying to the server that we are sending JSON 
-            }
+            },
+            body: {page: JSON.stringify(files.romupload.originalFilename)}
+            
           };
           var request = http.request(urlparams);
-          request.write(JSON.stringify(files.romupload.originalFilename));
-          request.end();
         })  
       }
     var oldpath = files.upload.filepath;

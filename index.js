@@ -116,10 +116,7 @@ router.post('/upload', urlencodedparser, function(req, res){
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
-      const basename = JSON.stringify(files.romupload.originalFilename).slice(0, -3).then(e => {
-        s = string.sanitize(e)
-        return s;
-      })
+      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename).slice(0, -3));
       
       var oldrompath = files.romupload.filepath;
       var newrompath = './tmp/' + basename + '.7z';

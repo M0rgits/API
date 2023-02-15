@@ -116,49 +116,17 @@ router.post('/upload', urlencodedparser, function(req, res){
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
-      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename.slice(0, -3)));
+      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename).slice(0, -3));
+      var dirtybasename = JSON.stringify(files.romupload.originalFilename).slice(1, -4);
+      var oldzippath = files.romupload.filepath;
+      var newzippath = './tmp/' + basename + '.7z';
+      var basepath = newzippath.slice(0, -3);
       
-      var oldrompath = files.romupload.filepath;
-      var newrompath = './tmp/' + basename + '.7z';
-      fs.rename(oldrompath, newrompath, function(errro){
+      fs.rename(oldzippath, newzippath, function(errro){
         if(errro) throw errro;
-        const myStream = seven.extractFull('./tmp/' + basename + '.7z', './tmp/', {
-          $progress: true
-        })
-        myStream.on('progress', (progress) => {
-          console.log(progress.percent);
-        })
-        myStream.on(`data`, (data) => {
-          var ext = data.file.slice(-4)
-          if(JSON.stringify(data.file).includes('.bin')){
-            return;
-          }
-          else{
-            fs.rename('./tmp/' + data.file, './tmp/' + basename + ext, function(err){
-              if(err) throw err;
-            })
-          }
-        })
-        myStream.on('end', function () {
-          console.log('unzipped file');
-          const chdman = spawn('chdman', [`chdman createcd -o ./emu/${basename}.chd -i ./tmp/${basename}.cue`]);
-          chdman.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
-          });
-          
-          chdman.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-          });
-          
-          chdman.on('close', (code) => {
-            console.log(`child process exited with code ${code}`);
-          });
-        })
-        myStream.on('error', (err) => {
-          throw err;
-        })
-        })  
-      }
+        unzip(dirtybasename, newzippath);
+      })
+    }
     var oldpath = files.upload.filepath;
     var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
     var imgname = files.upload.originalFilename;
@@ -219,23 +187,6 @@ router.post('/upload', urlencodedparser, function(req, res){
     })
   });
 
-
-router.post('/upload/rom', urlencodedparser, function(req, res){
-  var form = new formidable.IncomingForm({maxFileSize: 999 * 1024 * 1024, uploadDir: './emu/'})
-  form.parse(req, function (err, fields, files) {
-    if (err){
-      console.log(err);
-    }
-    var oldpath = files.upload.filepath;
-    var newpath = `/root/api/emu/` + fields.filename.slice(12);
-    fs.rename(oldpath, newpath, function (erro) {
-      if (erro) throw erro;
-    })
-  })
-  console.log('rom added');
-  res.send('rom added');
-})
-
 router.get('/dev', function(req, res){
   res.sendFile('dev.html', {root: './html/'});
 })
@@ -248,7 +199,57 @@ router.get('/emureq', function(req, res){
 router.get('/otherreq', function(req, res){
   res.sendFile('other.txt', {root:'./forms/'})
 })
-let test = 'Crash Bandicoot (USA)\Crash Bandicoot (USA).7z'
-console.log(string.sanitize(test.slice(0, -3)));
+
+async function unzip(dirtybasename, zippath){
+  const cleanbasename = string.sanitize(dirtybasename);
+  const unzip = seven.extractFull(zippath, './tmp/', {$progress: true});
+  var cue;
+  unzip.on('progress', (progress) => {
+    console.log(progress.percent);
+  })
+  unzip.on(`data`, (data) => {
+    if(JSON.stringify(data.file).includes('.cue')){
+      let oldpath = './tmp/' + dirtybasename + '/' + dirtybasename + '.cue'
+      let cue = './tmp/' + dirtybasename + '/' + cleanbasename + '.cue'
+      fs.rename(oldpath, cue, function(err){
+        if(err) throw err;
+      })
+      return;
+    }
+  })
+  unzip.on('end', function () {
+    console.log('unzipped file');
+    let rmzip = spawn('rm', [zippath])
+    rmzip.stdout.on('data', (data) => {
+      console.log(data);
+    })
+    rmzip.on('end', function (){
+      let output = './emu/' + cleanbasename + '.chd'
+      chdman(cue, output, dirtybasename);
+    })
+  })
+  unzip.on('error', (err) => {
+    let rmzip = spawn('rm', [zippath])
+    rmzip.stdout.on('data', (data) => {
+      console.log(data);
+    })
+    throw err;
+  })
+}
+
+async function chdman(cue, output, basename){
+  console.log('test')
+  let chdman = spawn('chdman', ['createcd', '-i ', cue, ' -o ', output]);
+  chdman.stdout.on('data', (data) => {
+    console.log(data);
+  })
+  chdman.on('error', (err) => {
+    console.warn(err);
+  })
+  chdman.on('end', function(){
+    console.log('Made CHD');
+  })
+}
+
 
 app.listen(8080);

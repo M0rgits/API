@@ -129,12 +129,12 @@ router.post('/upload', urlencodedparser, function(req, res){
           console.log(progress.percent);
         })
         myStream.on(`data`, (data) => {
-          var clean = string.sanitize(data.file.slice(5, -4))+ data.file.slice(-4)
+          var ext = data.file.slice(-4)
           if(JSON.stringify(data.file).includes('.bin')){
             return;
           }
           else{
-            fs.rename('./tmp/' + data.file, './tmp/' + clean, function(err){
+            fs.rename('./tmp/' + data.file, './tmp/' + basename + ext, function(err){
               if(err) throw err;
             })
           }

@@ -4,11 +4,12 @@ const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
 const seven = require('node-7z');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 const app = express();
 const router = express.Router();
 var urlencodedparser = bodyParser.urlencoded({extended: false})
+
 
 const h5g = require('./json/h5g.json');
 const emu = require('./json/emu.json'); 
@@ -128,7 +129,18 @@ router.post('/upload', urlencodedparser, function(req, res){
         
         myStream.on('end', function () {
           console.log('unzipped file');
-          exec('chdman createcd "' + JSON.stringify(path).slice(0, -3) + '.cue" ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd')
+          const chdman = spawn('chdman', ['chdman createcd ./tmp/' + JSON.stringify(path).slice(0, -3) + '/' + JSON.stringify(path).slice(0, -3) + '.cue ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd']);
+          chdman.stdout.on('data', (data) => {
+            console.log(`stdout: ${data}`);
+          });
+          
+          chdman.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+          });
+          
+          chdman.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+          });
         })
         myStream.on('error', (err) => {
           throw err;

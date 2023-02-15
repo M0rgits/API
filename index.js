@@ -108,12 +108,12 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
 
 router.post('/upload', urlencodedparser, function(req, res){
   req.setTimeout(9999999999);
-  var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
+  var form = new formidable.IncomingForm({uploadDir: '../shared/', maxFileSize: 2048 * 1024 * 1024});
   form.parse(req, function (err, fields, files) {
     if(err) throw err;
     if(files.romupload){
       var oldrompath = files.romupload.filepath;
-      var newrompath = './tmp/' + files.romupload.originalFilename;
+      var newrompath = '../shared/' + files.romupload.originalFilename;
       fs.rename(oldrompath, newrompath, function(errro){
         if(errro) throw errro;
           axios.post('http://localhost:8081/', {path: JSON.stringify(files.romupload.originalFilename)});

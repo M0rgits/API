@@ -130,11 +130,12 @@ router.post('/upload', urlencodedparser, function(req, res){
         })
         myStream.on(`data`, (data) => {
           var clean = string.sanitize(data.file.slice(5, -4))+ data.file.slice(-4)
-          fs.rename('./tmp/' + data.file, './tmp/' + clean, function(err){
-            if(err) throw err;
-          })
+          if(data.file.includes('.bin') = false){
+            fs.rename('./tmp/' + data.file, './tmp/' + clean, function(err){
+              if(err) throw err;
+            })
+          }
         })
-        
         myStream.on('end', function () {
           console.log('unzipped file');
           const chdman = spawn(`chdman createcd -i ./tmp/${basename}.cue -o ./emu/${basename}.chd`);

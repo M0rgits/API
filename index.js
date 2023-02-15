@@ -6,6 +6,7 @@ const path = require('path');
 const seven = require('node-7z');
 const { spawn } = require('child_process');
 const string = require('string-sanitizer');
+const http = require('http')
 
 const app = express();
 const router = express.Router();
@@ -110,83 +111,6 @@ router.post('/gmerequest', urlencodedparser, function(req, res){
   }
 });
 
-router.post('/upload', urlencodedparser, function(req, res){
-  req.setTimeout(9999999999);
-  var form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
-  form.parse(req, function (err, fields, files) {
-    if(err) throw err;
-    if(files.romupload){
-      const basename = string.sanitize(JSON.stringify(files.romupload.originalFilename).slice(0, -3));
-      var dirtybasename = JSON.stringify(files.romupload.originalFilename).slice(1, -4);
-      var oldzippath = files.romupload.filepath;
-      var newzippath = './tmp/' + basename + '.7z';
-      var basepath = newzippath.slice(0, -3);
-      
-      fs.rename(oldzippath, newzippath, function(errro){
-        if(errro) throw errro;
-        unzip(dirtybasename, newzippath);
-      })
-    }
-    var oldpath = files.upload.filepath;
-    var newpath = `./img/${fields.type}/` + files.upload.originalFilename;
-    var imgname = files.upload.originalFilename;
-    fs.rename(oldpath, newpath, function (err) {
-      if (err) throw err;
-    });
-    if(fields.type === 'h5g'){
-      let jsonpath = './json/h5g.json';
-      let json = JSON.parse(fs.readFileSync(jsonpath));
-      let name = fields.name
-      if(fields.path != ''){
-        let path = fields.path
-        json.push({name: name, path: path, img: imgname, pop:0});
-        let data = JSON.stringify(json);
-        fs.writeFileSync(jsonpath, data);
-        res.send(name + " added to h5g.json")
-        res.end()
-      }
-      if(fields.iframe != ''){
-        let iframe = fields.iframe
-        json.push({name: name, iframe: iframe, img: imgname, pop:0});
-        let data = JSON.stringify(json);
-        fs.writeFileSync(jsonpath, data);
-        res.send(name + " added to h5g.json")
-      }
-      if(fields.custom != ''){
-        if(fields.prox != ''){
-          let custom = fields.custom;
-          let prox = fields.prox;
-          json.push({name: name, custom: custom, prox: prox ,img: imgname, pop:0});
-          let data = JSON.stringify(json);
-          fs.writeFileSync(jsonpath, data);
-          res.send(name + " added to h5g.json")
-          res.end()
-        }
-        else{
-          let custom = fields.path
-          json.push({name: name, custom: custom, img: imgname, pop:0});
-          let data = JSON.stringify(json);
-          fs.writeFileSync(jsonpath, data);
-          console.log(name + " added to h5g.json")
-          res.end()
-        }
-      }
-    }
-    if(fields.type === 'emu'){
-      let jsonpath = './json/emu.json';
-      let json = JSON.parse(fs.readFileSync(jsonpath));
-      let name = fields.name;
-      let core = fields.core;
-      let rom = files.romupload.originalFilename;
-      json.push({name: name, core: core, rom: rom, img: imgname, pop:0});
-      let data = JSON.stringify(json);
-      fs.writeFileSync(jsonpath, data);
-      res.send(name + " added to emu.json")
-      res.end();
-      }
-    })
-  });
-
 router.get('/dev', function(req, res){
   res.sendFile('dev.html', {root: './html/'});
 })
@@ -199,57 +123,5 @@ router.get('/emureq', function(req, res){
 router.get('/otherreq', function(req, res){
   res.sendFile('other.txt', {root:'./forms/'})
 })
-
-async function unzip(dirtybasename, zippath){
-  const cleanbasename = string.sanitize(dirtybasename);
-  const unzip = seven.extractFull(zippath, './tmp/', {$progress: true});
-  var cue;
-  unzip.on('progress', (progress) => {
-    console.log(progress.percent);
-  })
-  unzip.on(`data`, (data) => {
-    if(JSON.stringify(data.file).includes('.cue')){
-      let oldpath = './tmp/' + dirtybasename + '/' + dirtybasename + '.cue'
-      let cue = './tmp/' + dirtybasename + '/' + cleanbasename + '.cue'
-      fs.rename(oldpath, cue, function(err){
-        if(err) throw err;
-      })
-      return;
-    }
-  })
-  unzip.on('end', function () {
-    console.log('unzipped file');
-    let rmzip = spawn('rm', [zippath])
-    rmzip.stdout.on('data', (data) => {
-      console.log(data);
-    })
-    rmzip.on('end', function (){
-      let output = './emu/' + cleanbasename + '.chd'
-      chdman(cue, output, dirtybasename);
-    })
-  })
-  unzip.on('error', (err) => {
-    let rmzip = spawn('rm', [zippath])
-    rmzip.stdout.on('data', (data) => {
-      console.log(data);
-    })
-    throw err;
-  })
-}
-
-async function chdman(cue, output, basename){
-  console.log('test')
-  let chdman = spawn('chdman', ['createcd', '-i ', cue, ' -o ', output]);
-  chdman.stdout.on('data', (data) => {
-    console.log(data);
-  })
-  chdman.on('error', (err) => {
-    console.warn(err);
-  })
-  chdman.on('end', function(){
-    console.log('Made CHD');
-  })
-}
-
 
 app.listen(8080);

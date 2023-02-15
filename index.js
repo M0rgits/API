@@ -129,7 +129,7 @@ router.post('/upload', urlencodedparser, function(req, res){
         
         myStream.on('end', function () {
           console.log('unzipped file');
-          const chdman = spawn('chdman', ['chdman createcd ./tmp/' + JSON.stringify(path).slice(0, -3) + '/' + JSON.stringify(path).slice(0, -3) + '.cue ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd']);
+          const chdman = spawn('chdman', ['chdman createcd -i ./tmp/' + JSON.stringify(path).slice(0, -3) + '/' + JSON.stringify(path).slice(0, -3) + '.cue -o ../api/emu/' + JSON.stringify(path).slice(0, -3) + '.chd']);
           chdman.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
           });

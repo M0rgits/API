@@ -141,7 +141,7 @@ router.post('/upload', urlencodedparser, function(req, res){
         })
         myStream.on('end', function () {
           console.log('unzipped file');
-          const chdman = spawn(`chdman createcd -i "./tmp/${basename}.cue" -o "./emu/${basename}.chd"`);
+          const chdman = spawn('chdman', [`chdman createcd -i "./tmp/${basename}.cue" -o "./emu/${basename}.chd"`]);
           chdman.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
           });

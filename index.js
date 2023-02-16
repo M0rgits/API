@@ -135,13 +135,13 @@ router.post('/upload', urlencodedparser, async function(req, res){
     //transfer img to ./img dir
     fs.rename(files.upload.filepath, `./img/${type}/${files.upload.originalFilename}`, function(err){
       if(err) throw err;
-      let img = files.upload.originalFilename;
-      obj.img = img;
       console.log('Moved Img');
     })
     //check if its emu game
     if(type === 'emu'){
       let core = fields.core;
+      let img = files.upload.originalFilename;
+      obj.img = img;
       obj.core = core
       //check if its psx 7z archive
       if(core === 'mednafen_psx_hw' && JSON.stringify(files.romupload.originalFilename).includes('.7z')){

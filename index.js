@@ -141,7 +141,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
     })
     //rename zip to original name
     if(type === 'emu'){
-      let core = req.body.core;
+      let core = fields.core;
       obj.core = core
       fs.rename(`${files.romupload.filepath}`, `./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.7z'}`, function(err){
         if(err) throw err;
@@ -171,9 +171,10 @@ router.post('/upload', urlencodedparser, async function(req, res){
             console.log(data);
           })
         })
+        
         //push obj to json
-        let emu = JSON.parse(fs.readFileSync('./json/emu.json'));
-        emu.push(obj)
+        let emu = JSON.parse(fs.readFileSync('./json/emu.json'))
+            emu.push(obj)
         let data = JSON.stringify(emu);
         fs.writeFile(`./json/${type}.json`, data, function(err){
           if(err) throw err;

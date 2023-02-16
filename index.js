@@ -200,7 +200,7 @@ function zipchdhandler(files, obj, type){
         if (err) throw err;
         console.log('Renamed .cue')
         //run chdman
-        let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "../emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd"`)
+        let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "../emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd" && cd ../ && rm -r tmp && mkdir tmp`);
         chdman.stderr.on('data', (data) => {
           console.warn(data);
         })
@@ -208,13 +208,6 @@ function zipchdhandler(files, obj, type){
           console.log(data);
         })
         chdman.on('end', function(){
-          let cleantmp = exec('rm -r ./tmp/ && mkdir ./tmp/');
-          cleantmp.stderr.on('data', (data) => {
-            console.warn(data);
-          })
-          cleantmp.stdout.on('data', (data) => {
-            console.log(data);
-          })
           jsonpush(obj, type);
         })
       })

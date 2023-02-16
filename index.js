@@ -170,6 +170,9 @@ router.post('/upload', urlencodedparser, async function(req, res){
           chdman.stdout.on('data', (data) => {
             console.log(data);
           })
+          chdman.on('end', function() => {
+            exec('rm -r ./tmp && mkdir ./tmp');
+          })
         })
         
         //push obj to json

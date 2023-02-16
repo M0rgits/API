@@ -4,9 +4,8 @@ const fs = require('fs');
 const formidable = require('formidable');
 const path = require('path');
 const seven = require('node-7z');
-const { spawn } = require('child_process');
+const { exec, spawn } = require('child_process');
 const string = require('string-sanitizer');
-const http = require('http')
 
 const app = express();
 const router = express.Router();
@@ -123,5 +122,68 @@ router.get('/emureq', function(req, res){
 router.get('/otherreq', function(req, res){
   res.sendFile('other.txt', {root:'./forms/'})
 })
+
+router.post('/upload', urlencodedparser, async function(req, res){
+  let obj = {};
+  let form = new formidable.IncomingForm({uploadDir: './tmp/', maxFileSize: 2048 * 1024 * 1024});
+  req.setTimeout(99999999);
+  form.parse(req, async function(err, fields, files){
+    if (err) throw err;
+    let type = fields.type;
+    let name = fields.name;
+    obj.name = name;
+    //transfer img to ./img dir
+    fs.rename(files.upload.filepath, `./img/${type}/${files.upload.originalFilename}`, function(err){
+      if(err) throw err;
+      let img = files.upload.originalFilename;
+      obj.img = img;
+      console.log('Moved Img');
+    })
+    //rename zip to original name
+    if(type === 'emu'){
+      let core = req.body.core;
+      obj.core = core
+      fs.rename(`${files.romupload.filepath}`, `./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.7z'}`, function(err){
+        if(err) throw err;
+        console.log('Renamed Zip');
+        let rom = string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.chd'
+        obj.rom = rom
+        //unzip archive
+        let unzip = seven.extractFull(`./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.7z`, `./tmp/`, {$progress: true});
+      unzip.on('error', (err) => {
+        throw err;
+      })
+        unzip.on('progress', (progress) => {
+          console.log(progress.percent)
+        })
+      unzip.on('end', function(){
+        console.log('Unzipped .7z Archive')
+        //clean cue name
+        fs.rename(`./tmp/${files.romupload.originalFilename.slice(0, -3)}/${files.romupload.originalFilename.slice(0, -3)}.cue`, `./tmp/${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue`, function(err){
+          if (err) throw err;
+          console.log('Renamed .cue')
+          //run chdman
+          let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "./emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd"`)
+          chdman.stderr.on('data', (data) => {
+            console.warn(data);
+          })
+          chdman.stdout.on('data', (data) => {
+            console.log(data);
+          })
+        })
+        //push obj to json
+        let emu = JSON.parse(fs.readFileSync('./json/emu.json'));
+        emu.push(obj)
+        let data = JSON.stringify(emu);
+        fs.writeFile(`./json/${type}.json`, data, function(err){
+          if(err) throw err;
+        })
+        console.log('pushed to json');
+      })
+      })      
+    }
+  })
+})
+
 
 app.listen(8080);

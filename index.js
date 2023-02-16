@@ -220,7 +220,9 @@ function jsonpush(obj, type){
   let json = JSON.parse(fs.readFileSync(`./json/${type}.json`));
   json.push(obj);
   let data = JSON.stringify(json);
-  fs.writeFile(`./json/${type}.json`, data);
+  fs.writeFile(`./json/${type}.json`, data, function(err) => {
+    if (err) throw err;
+  });
 }
 
 

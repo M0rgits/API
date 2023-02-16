@@ -208,7 +208,13 @@ function zipchdhandler(files, obj, type){
           console.log(data);
         })
         chdman.on('end', function(){
-          exec('rm -r ./tmp && mkdir ./tmp');
+          let cleantmp = exec('rm -r ./tmp/ && mkdir ./tmp/');
+          cleantmp.stderr.on('data', (data) => {
+            console.warn(data);
+          })
+          cleantmp.stdout.on('data', (data) => {
+            console.log(data);
+          })
           jsonpush(obj, type);
         })
       })

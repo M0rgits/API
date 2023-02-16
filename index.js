@@ -148,6 +148,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
         let rom = string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.chd'
         obj.rom = rom
         zipchdhandler(files, obj, type);
+        jsonpush(obj, type);
       }
       else{
         let rom = files.romupload.originalFilename;
@@ -183,7 +184,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
   })
 })
 
-function zipchdhandler(files, obj, type){
+function zipchdhandler(files){
   fs.rename(`${files.romupload.filepath}`, `./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.7z'}`, function(err){
     if (err) throw err;
     console.log('Renamed Zip');
@@ -208,7 +209,7 @@ function zipchdhandler(files, obj, type){
           console.log(data);
         })
         chdman.on('end', function(){
-          jsonpush(obj, type);
+          console.log('Made CHD');
         })
       })
     })

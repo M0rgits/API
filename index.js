@@ -163,7 +163,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
           if (err) throw err;
           console.log('Renamed .cue')
           //run chdman
-          let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "./emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd"`)
+          let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "../emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd"`)
           chdman.stderr.on('data', (data) => {
             console.warn(data);
           })

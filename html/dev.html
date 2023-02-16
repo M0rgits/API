@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  </head>
+  <body>
+
+    <form action="/upload" enctype="multipart/form-data" method="post">
+      <select name="type" id='type' onchange='checktype()'>
+        <option value='h5g'>H5G</option>
+        <option value='emu'>EMU</option>
+      </select>
+      <input type="text" name="name" placeholder="name" class='hidden' id='name' style='display:none;'><br>
+      <select name='core' class='hidden' id='core' style='display:none;'>
+      <option value='genesis_plus_gx'>Sega Systems</option>
+      <option value='a5200'>Atari 5200</option>
+      <option value='prosystem'>Atari 7800</option>
+      <option value='stella'>Atari 2600</option>
+      <option value='mednafen_psx_hw'>Playstation</option>
+      <option value='mgba'>GB/GBA/GBC</option>
+      <option value='melonds'>Nintendo DS</option>
+      <option value='mupen64plus_next'>N64</option>
+      <option value='nestopia'>NES</option>
+      <option value='snes'>SNES</option>
+    </select>
+      <input type="text" name="rom" placeholder="rom" class='hidden' id='rom' style='display:none;'><br>
+      <select id='h5gtype' class='hidden' style='display:none;' onchange='checkh5gtype()'>
+        <option value='path'>Path</option>
+        <option value='iframe'>Iframe</option>
+        <option value='custom'>Custom</option>
+      </select>
+      <select id='customprox' class='hidden' name='prox' style='display:none;'>
+        <option value='true'>Prox</option>
+        <option value='false'>Don't Prox</option>
+      </select>
+      <input type="text" name="path" placeholder="path" class='hidden' id='path' style='display:none;'><br>
+      <input type="text" name="iframe" placeholder="iframe" class='hidden' id='iframe' style='display:none;'><br>
+      <input type="text" name="custom" placeholder="custom" class='hidden' id='custom' style='display:none;'><br>
+      <a>Img</a>
+      <input type="file" name="upload" multiple="multiple"><br>
+      <a id='roma' style='display:none;'>Rom</a>
+      <input type="file" name="romupload" multiple="multiple" id='romfile' style='display:none;'><br>
+      <input type="submit" value="Upload" id='submit' class='hidden' style='display:none;'>
+    </form>
+    <a href='/h5greq'>H5G req</a>
+    <a href='/emureq'>EMU req</a>
+    <a href='/otherreq'>OTHER req</a>
+    <script src='index.js' type='text/javascript'></script>
+  </body>
+</html>

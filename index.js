@@ -139,10 +139,12 @@ router.post('/upload', urlencodedparser, async function(req, res){
       obj.img = img;
       console.log('Moved Img');
     })
-    //rename zip to original name
+    //check if its emu game
     if(type === 'emu'){
       let core = fields.core;
       obj.core = core
+      //check if its psx 7z archive
+      if(core === 'mednafen_psx_hw' && JSON.stringify(files.romupload.originalFilename).includes('.7z')){
       fs.rename(`${files.romupload.filepath}`, `./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.7z'}`, function(err){
         if(err) throw err;
         console.log('Renamed Zip');
@@ -170,7 +172,7 @@ router.post('/upload', urlencodedparser, async function(req, res){
           chdman.stdout.on('data', (data) => {
             console.log(data);
           })
-          chdman.on('end', function() => {
+          chdman.on('end', function(){
             exec('rm -r ./tmp && mkdir ./tmp');
           })
         })
@@ -184,7 +186,8 @@ router.post('/upload', urlencodedparser, async function(req, res){
         })
         console.log('pushed to json');
       })
-      })      
+      })   
+      }
     }
   })
 })

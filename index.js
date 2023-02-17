@@ -163,28 +163,40 @@ router.post('/upload', urlencodedparser, async function(req, res){
     if(type === 'h5g'){
       if(fields.path != ''){
         console.log('Type: PATH');
+        let img = files.upload.originalFilename;
+        obj.img = img;
         obj.path = fields.path;
         jsonpush(obj, type);
       }
       else if(fields.iframe != ''){
+        let img = files.upload.originalFilename;
+        obj.img = img;
         console.log('Type: IFRAME');
         obj.iframe = fields.iframe;
         jsonpush(obj, type);
       }
-      else if(fields.custom != ''){
+      else if(fields.custom != '' && fields.prox === 'true'){
+        let img = files.upload.originalFilename;
+        obj.img = img;
         console.log('Type: CUSTOM');
         obj.custom = fields.custom;
-        if(fields.prox === 'true'){
-          console.log('CUSTOM: PROX set to TRUE');
-          obj.prox = fields.prox;
-        }
+        console.log('CUSTOM: PROX set to TRUE');
+        obj.prox = fields.prox;
         jsonpush(obj, type);
+      }
+      else if(fields.custom != ''){
+        let img = files.upload.originalFilename;
+        obj.img = img;
+        console.log('Type: CUSTOM');
+        obj.custom = fields.custom;
+        jsonpush(obj, type)
       }
     }
   })
 })
 
 function zipchdhandler(files){
+  //rename .7z archive
   fs.rename(`${files.romupload.filepath}`, `./tmp/${string.sanitize(files.romupload.originalFilename.slice(0, -3)) + '.7z'}`, function(err){
     if (err) throw err;
     console.log('Renamed Zip');
@@ -197,10 +209,11 @@ function zipchdhandler(files){
     })
     unzip.on('end', function(){
       console.log('Unzipped .7z Archive');
+      //rename .cue file
       fs.rename(`./tmp/${files.romupload.originalFilename.slice(0, -3)}/${files.romupload.originalFilename.slice(0, -3)}.cue`, `./tmp/${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue`, function(err){
         if (err) throw err;
         console.log('Renamed .cue')
-        //run chdman
+        //run chdman & clean tmp folder & restart pm2 daemon
         let chdman = exec(`cd ./tmp && chdman createcd -i "${files.romupload.originalFilename.slice(0, -3)}/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.cue" -o "../emu/${string.sanitize(files.romupload.originalFilename.slice(0, -3))}.chd" && cd ../ && rm -r tmp && mkdir tmp && pm2 reload index.js`);
         chdman.stderr.on('data', (data) => {
           console.warn(data);
